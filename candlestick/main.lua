@@ -45,7 +45,6 @@ end
 r=math.random
 
 function love.load()
-    pp(arg)
     -- Set up Love2D window
     love.window.setTitle("Candlestick Plot")
     love.window.setMode(800, 600, {resizable = false})
@@ -69,7 +68,8 @@ function love.load()
     -- local scaler = s(generateSample(300))
     local scaler = s(sample)
     -- scaleRows(canvasHeight, targetHeight)
-    local pow = arg[3] and tonumber(arg[3])
+    -- local pow = arg[3] and tonumber(arg[3])
+    local pow = scaler:log10()
     stockData = scaler:scaleRows(h, h*5*10^pow)
     stockData2 = scaler:scaleRows(h, h*2*10^pow)
     -- local pow = math.ceil(math.log10(scaler:minY()))
