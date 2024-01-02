@@ -5,6 +5,9 @@ function love.load()
 	explodesnd = love.audio.newSource("Explosion.wav", "stream")
 	explodesnd:setVolume(0.3)
 
+	lasersnd = love.audio.newSource("Laser2.wav", "stream")
+	lasersnd:setVolume(0.3)
+
     player = {
         x = 400,
         y = 300,
@@ -88,16 +91,18 @@ function love.update(dt)
             dy = math.sin(player.heading)
         }
         table.insert(bullets, bullet)
+        lasersnd:play()
     end
 
     -- Spawn new enemies randomly
     if math.random() < 0.01 then
         local enemy = {
-            x = math.random(player.x, love.graphics.getWidth()),
-            y = math.random(player.y, love.graphics.getHeight()),
+            x = math.random(player.x+20*math.random(-1, 1), love.graphics.getWidth()),
+            y = math.random(player.y+20*math.random(-1, 1), love.graphics.getHeight()),
             dx = math.random() - 0.5,
             dy = math.random() - 0.5
         }
+        enemy.color={math.random(), math.random(), math.random()}
         table.insert(enemies, enemy)
     end
 end
@@ -108,12 +113,16 @@ function love.draw()
 
     -- Draw bullets
     for _, bullet in ipairs(bullets) do
-        love.graphics.circle("fill", bullet.x, bullet.y, 5)
+        love.graphics.setColor({1,1,0})
+        love.graphics.circle("fill", bullet.x, bullet.y, 2)
+        love.graphics.setColor({1,1,1})
     end
 
     -- Draw enemies
     for _, enemy in ipairs(enemies) do
+        love.graphics.setColor(enemy.color)
         love.graphics.circle("fill", enemy.x, enemy.y, math.random(1, enemyRadius))
+        love.graphics.setColor({1,1,1})
     end
 end
 
