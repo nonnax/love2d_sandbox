@@ -28,12 +28,21 @@ function love.load()
     planets["Uranus"] = createPlanet(2871.0, 0, 0, 6.81, 14.54)
     planets["Neptune"] = createPlanet(4497.1, 0, 0, 5.43, 17.15)
     G = 6.674 * (10^-3)  -- gravitational constant
-    G = G * 10
+    G = G * 8 -- adjustment for simulation, 7 minimum too keep planets in orbit
 
+    frames = 0
+    trace = false
 end
 
 function love.update(dt)
     updatePlanets(dt)
+    if love.keyboard.isDown("space") then
+        trace = not trace
+    end
+end
+
+function love.mousereleased( x, y, button )
+    w, h = x, y
 end
 
 function love.draw()
@@ -48,24 +57,29 @@ function createPlanet(distance, eccentricity, inclination, velocity, mass)
     local vx = -velocity * math.sin(angle)
     local vy = velocity * math.cos(angle)
 
-    return {x = x, y = y, vx = vx, vy = vy, mass = mass}
+    return {x = x, y = y, vx = vx, vy = vy, mass = mass, tail={}, sun_distance=0}
 end
 
 function updatePlanets(dt)
-    for _, planet in pairs(planets) do
+    for name, planet in pairs(planets) do
         local ax, ay = 0, 0  -- acceleration components
 
-        for _, other in pairs(planets) do
+        for x_name, other in pairs(planets) do
             if planet ~= other then
                 local dx = other.x - planet.x
                 local dy = other.y - planet.y
+
                 local distance = math.sqrt(dx^2 + dy^2)
+                local angle = math.atan2(dy, dx)
 
                 local force = (G * planet.mass * other.mass) / (distance^2)
-                local angle = math.atan2(dy, dx)
 
                 ax = ax + force * math.cos(angle) / planet.mass
                 ay = ay + force * math.sin(angle) / planet.mass
+
+                if x_name == 'Sun' then
+                    planet.sun_distance=distance
+                end
             end
         end
 
@@ -74,13 +88,22 @@ function updatePlanets(dt)
 
         planet.x = planet.x + planet.vx * dt
         planet.y = planet.y + planet.vy * dt
+
+        if frames % 5 == 0 then
+            table.insert(planet.tail, {x=planet.x, y=planet.y})
+            if #planet.tail > 750 then
+                table.remove(planet.tail, 1)
+            end
+        end
     end
+    frames = frames + 1
 end
 
 function drawPlanets()
-   local scale = 0.08
+   local scale = 0.198
    love.graphics.push()
-   love.graphics.translate(w/2, h/2)
+   love.graphics.translate(w, h)
+   -- love.graphics.translate(love.mouse.getPosition())
     for x, planet in pairs(planets) do
         local size = planet.mass/1.2
         love.graphics.setColor({1, 1, 1})
@@ -96,9 +119,31 @@ function drawPlanets()
         elseif size < 1 then
             size = 1
         end
-        love.graphics.circle("fill", planet.x * scale, planet.y * scale, size)
+        if x=='Sun' then
+            love.graphics.circle("line", planet.x * scale, planet.y * scale, size)
+        else
+            love.graphics.circle("fill", planet.x * scale, planet.y * scale, size)
+        end
+
+        for i, t in ipairs(planet.tail) do
+           love.graphics.circle("fill", t.x * scale, t.y * scale, 0.2)
+        end
+
+        if trace then
+           -- local width = love.graphics.getLineWidth( )
+           love.graphics.setLineWidth(0.1)
+           love.graphics.line(0, 0, planet.x * scale, planet.y * scale)
+           love.graphics.print(x..':'..math.ceil(planet.sun_distance), planet.x * scale, planet.y * scale)
+           -- love.graphics.setLineWidth(width)
+        end
+
     end
     love.graphics.pop()
+    local row=1
+    for x, planet in pairs(planets) do
+        love.graphics.print(x..':'..math.ceil(planet.sun_distance), 0, row)
+        row = row + 15
+    end
 end
 
 function love.resize()
