@@ -6,7 +6,7 @@ local bullets = {}
 -- bullets = {}
 bullets.speed = 500
 
-function bullets:update(dt, enemies, direction, sound)
+function bullets:update(dt, enemies, direction, sound, player)
   -- Bullet movement
   for i, bullet in ipairs(self) do
     bullet.pos = bullet.pos + bullet.direction * bullets.speed * dt
@@ -29,6 +29,7 @@ function bullets:update(dt, enemies, direction, sound)
         table.remove(self, i)
         table.remove(enemies, j)
         sound.explode:play()
+        player.score = player.score + 1
       end
     end
   end

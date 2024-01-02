@@ -6,6 +6,12 @@ function sound:load()
 
 	self.laser = love.audio.newSource("Laser2.wav", "stream")
 	self.laser:setVolume(0.3)
+
+	music = love.audio.newSource("suspense.wav", "stream")
+	music:setLooping(true)
+	music:setVolume(0.2)
+	music:play()
+
 end
 
 return sound
