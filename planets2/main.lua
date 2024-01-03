@@ -1,5 +1,6 @@
 #!/usr/bin/env luvit
 -- main.lua
+tabler = require 'tabler'
 
 local function windowInit()
     w, h = love.graphics.getDimensions()
@@ -27,22 +28,44 @@ function love.load()
     planets["Saturn"] = createPlanet(1427.0, 0, 0, 9.68, 95.16)
     planets["Uranus"] = createPlanet(2871.0, 0, 0, 6.81, 14.54)
     planets["Neptune"] = createPlanet(4497.1, 0, 0, 5.43, 17.15)
-    G = 6.674 * (10^-3)  -- gravitational constant
-    G = G * 8 -- adjustment for simulation, 7 minimum too keep planets in orbit
+    -- G = 6.674 * (10^-3)  -- gravitational constant
+    GConstant = 6.674 * (10^-2)  -- gravitational constant
+    G = GConstant
+    -- factor = 8
+    factor = 1.61803399
+    G = G * factor -- adjustment for simulation, 7 minimum too keep planets in orbit
 
     frames = 0
     trace = false
+    scale = 0.198
+    font = love.graphics.newFont( 'Monaco-Bold.otf' )
+    love.graphics.setFont(font)
+    print(tabler(planets))
 end
 
 function love.update(dt)
     updatePlanets(dt)
     if love.keyboard.isDown("space") then
         trace = not trace
+    elseif love.keyboard.isDown("down") then
+        scale = scale - 0.01
+    elseif love.keyboard.isDown("up") then
+        scale = scale + 0.01
     end
+    if scale < 0 then scale = 0.00001 end
 end
 
 function love.mousereleased( x, y, button )
     w, h = x, y
+end
+
+function love.wheelmoved(x, y)
+    if y > 0 then
+        scale = scale + 0.05
+    elseif y < 0 then
+        scale = scale - 0.05
+    end
+    if scale < 0 then scale = 0.00001 end
 end
 
 function love.draw()
@@ -51,13 +74,13 @@ end
 
 function createPlanet(distance, eccentricity, inclination, velocity, mass)
     -- local angle = love.math.random() * 2 * math.pi
-    local angle = love.math.random() * math.pi
+    local angle = love.math.random(math.pi * 4)
     local x = distance * math.cos(angle)
     local y = distance * math.sin(angle)
     local vx = -velocity * math.sin(angle)
     local vy = velocity * math.cos(angle)
 
-    return {x = x, y = y, vx = vx, vy = vy, mass = mass, tail={}, sun_distance=0}
+    return {x = x, y = y, vx = vx, vy = vy, mass = mass, tail={}, sun_distance=0, sun_force=0}
 end
 
 function updatePlanets(dt)
@@ -79,6 +102,7 @@ function updatePlanets(dt)
 
                 if x_name == 'Sun' then
                     planet.sun_distance=distance
+                    planet.sun_force=force
                 end
             end
         end
@@ -89,7 +113,7 @@ function updatePlanets(dt)
         planet.x = planet.x + planet.vx * dt
         planet.y = planet.y + planet.vy * dt
 
-        if frames % 5 == 0 then
+        if frames % 15 == 0 then
             table.insert(planet.tail, {x=planet.x, y=planet.y})
             if #planet.tail > 750 then
                 table.remove(planet.tail, 1)
@@ -100,7 +124,6 @@ function updatePlanets(dt)
 end
 
 function drawPlanets()
-   local scale = 0.198
    love.graphics.push()
    love.graphics.translate(w, h)
    -- love.graphics.translate(love.mouse.getPosition())
@@ -110,6 +133,9 @@ function drawPlanets()
         if x=='Sun'  then
             size = 4
             love.graphics.setColor({0, 1, 0})
+        elseif x=='Earth' then
+            size = 1.5
+            love.graphics.setColor({1, 0, 1})
         elseif x=='Jupiter'or x=='Saturn' then
             love.graphics.setColor({1, 0, 0})
             size = 3
@@ -119,8 +145,11 @@ function drawPlanets()
         elseif size < 1 then
             size = 1
         end
+
+        size = size * scale
+
         if x=='Sun' then
-            love.graphics.circle("line", planet.x * scale, planet.y * scale, size)
+            love.graphics.circle("fill", planet.x * scale, planet.y * scale, math.random(size-2, size))
         else
             love.graphics.circle("fill", planet.x * scale, planet.y * scale, size)
         end
@@ -133,17 +162,33 @@ function drawPlanets()
            -- local width = love.graphics.getLineWidth( )
            love.graphics.setLineWidth(0.1)
            love.graphics.line(0, 0, planet.x * scale, planet.y * scale)
-           love.graphics.print(x..':'..math.ceil(planet.sun_distance), planet.x * scale, planet.y * scale)
+           love.graphics.print(string.format("%s: %d", x, planet.sun_distance), planet.x * scale, planet.y * scale)
            -- love.graphics.setLineWidth(width)
         end
 
     end
     love.graphics.pop()
-    local row=1
+    love.graphics.print(string.format("% 10s\t% 9s % 12s % 9s", 'planet', 'dist', 'mass/earth', 'sun_force'), 0, 0)
+    local row=10
     for x, planet in pairs(planets) do
-        love.graphics.print(x..':'..math.ceil(planet.sun_distance), 0, row)
+        if x=='Sun'  then
+            love.graphics.setColor({0, 1, 0})
+        elseif x=='Jupiter'or x=='Saturn' then
+            love.graphics.setColor({1, 0, 0})
+        elseif x=='Neptune'or x=='Uranus' then
+            love.graphics.setColor({0, 0, 1})
+        elseif x=='Earth' then
+            love.graphics.setColor({1, 0, 1})
+        else
+            love.graphics.setColor({1, 1, 1})
+        end
+
+        -- love.graphics.print(x..':'..math.ceil(planet.sun_distance), 0, row)
+        love.graphics.print(string.format("% 10s:\t% 9.2f % 12.2f % 9.2f", x, planet.sun_distance, planet.mass, planet.sun_force), 0, row)
+
         row = row + 15
     end
+    love.graphics.print(string.format("G:%f x %f = G(simulation):%f", GConstant, factor, G), 0, row + 20)
 end
 
 function love.resize()

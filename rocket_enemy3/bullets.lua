@@ -1,5 +1,6 @@
 #!/usr/bin/env luvit
 
+
 local LG = love.graphics
 local bullets = {}
 
@@ -24,7 +25,7 @@ function bullets:update(dt, enemies, direction, sound, player)
   -- Collision detection between bullets and enemies
   for i, bullet in ipairs(self) do
     for j, enemy in ipairs(enemies) do
-      if bullets.distance(bullet.pos, enemy.pos) < enemy.radius then
+      if distance(bullet.pos, enemy.pos) < enemy.radius then
         -- Remove both the bullet and the enemy
         table.remove(self, i)
         table.remove(enemies, j)
@@ -47,10 +48,6 @@ function bullets:shoot(direction, sound)
   end
 end
 
-function bullets.distance(a, b)
-    return math.sqrt((b.x - a.x)^2 + (b.y - a.y)^2)
-end
-
 function bullets:draw()
   -- Draw bullets
   for _, bullet in ipairs(self) do
@@ -58,4 +55,10 @@ function bullets:draw()
   end
 end
 
+-- Helper function to calculate distance between vectors
+function distance(a, b)
+    return math.sqrt((b.x - a.x)^2 + (b.y - a.y)^2)
+end
+
 return bullets
+
