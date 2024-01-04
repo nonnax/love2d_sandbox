@@ -9,12 +9,12 @@ local bullets = require "bullets"
 function love.load()
     player = {}
     player.pos = vector(400, 300)
-    player.speed = 100
+    player.speed = 80
     player.score = 0
 
     enemies:load()
     sound:load()
-    -- move player on start, otherwise bullets fired will be stuck in place ('_')
+    -- do not (0, 0) direction, must move player on start, otherwise bullets fired will be stuck in place ('_')
     direction = vector(math.random(), math.random())
     -- cam = camera()
 end
@@ -35,18 +35,9 @@ function love.update(dt)
     end
 
     player.pos = player.pos + direction:norm() * player.speed * dt
-    -- Bullet movement
+    -- Bullet movement & Check Player collision
     bullets:update(dt, enemies, direction, sound, player)
 
-    -- Check Player collision
-    for i, enemy in ipairs(enemies) do
-        if distance(player.pos, enemy.pos) < enemy.radius then
-            sound.explode2:play()
-            player.score = player.score - 10
-            table.remove(enemies, i)
-            player.hit=true
-        end
-    end
     -- Spawn new enemies randomly
     enemies:spawn()
     -- cam:lookAt(player.pos.x, player.pos.y)
@@ -71,7 +62,3 @@ function love.draw()
 
 end
 
--- Helper function to calculate distance between two points
--- function distance(x1, y1, x2, y2)
---     return math.sqrt((x2 - x1)^2 + (y2 - y1)^2)
--- end

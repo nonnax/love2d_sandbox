@@ -9,7 +9,7 @@ function enemies:load()
   self.enemyRadius = 20
 end
 
-function enemies:update(dt, player)
+function enemies:update(dt, player, sound)
   -- Enemy movement (orbit around the player)
   for i, enemy in ipairs(self) do
     local dirToPlayer = player.pos - enemy.pos
@@ -19,7 +19,17 @@ function enemies:update(dt, player)
     -- Remove enemies that go off-screen
     if enemy.pos.x < 0 or enemy.pos.x > LG.getWidth() or enemy.pos.y < 0 or
       enemy.pos.y > LG.getHeight() then table.remove(self, i) end
+  -- end
+    -- Check Player collision
+    -- for i, enemy in ipairs(enemies) do
+    if vector.dist(player.pos, enemy.pos) < enemy.radius then
+        sound.explode2:play()
+        player.score = player.score - 10
+        table.remove(self, i)
+        player.hit=true
+    end
   end
+
 end
 
 function enemies:spawn()

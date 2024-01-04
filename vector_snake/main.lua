@@ -28,6 +28,7 @@ function love.update(dt)
 	 fruit_hit = false
 	 fruit_player_hit = false
 
+	 -- if player collides with the head or tail of the snake
 	 if vector.dist(player, pos) < player_radius*2 then
 	 		hit = true
 	 		taillen = taillen + 1
@@ -42,6 +43,9 @@ function love.update(dt)
 			 end
 	 end
 
+	 -- fruits kills the snake, respawn a new snake
+	 -- fruits collides with player and subtract 1 from score
+	 -- delete the hit fruit
 	 for i, fruit in ipairs(fruits) do
 			 if vector.dist(pos, fruit) < fruit_radius*2 then
 			 		score = score + 1
@@ -69,8 +73,8 @@ function love.update(dt)
 
   local m = player
 	 local acc = m - pos
-	 acc:setmag(2.3)
-	 vel=initvel+acc
+	 acc:setmag(2.2)
+	 vel = initvel+acc
 	 pos = pos + vel
 
 
