@@ -15,13 +15,14 @@ end
 
 function love.update(dt)
   body.hit=false
+  -- check for any earlier hits then reset hit property of enemy
   for i, e in ipairs(enemies) do
     if e.hit then
       table.remove(enemies, i)
     end
     e.hit=false
     local acc = body.pos - e.pos
-    acc:setmag(3)
+    acc:setmag(math.random(1, 3))
     e.vel = e.initvel + acc
     e.pos = e.pos + e.vel
   end
@@ -46,13 +47,30 @@ function love.update(dt)
   end
 
   body.pos = body.pos + dir.move() * speed
+  if #body.tail > 20 then
+    body.shrink()
+  else
+    body.grow()
+  end
 
   for i, e in ipairs(enemies) do
+     -- if head to head
      body.when_hit(e, function()
+       e.hit=true
+       -- dir.bounce()
+       s.explode:play()
+     end)
+     body.when_tail_hit(e.tail, function()
        e.hit=true
        -- dir.bounce()
        s.laser:play()
      end)
+
+     if #e.tail > 50 then
+      e.shrink()
+     else
+      e.grow()
+     end
   end
 
 
@@ -70,11 +88,20 @@ function love.keyreleased(k)
 end
 
 function love.draw()
- love.graphics.circle('line', body.pos.x, body.pos.y, body.radius)
+ love.graphics.setColor({1, 0, 0})
+ love.graphics.circle('fill', body.pos.x, body.pos.y, body.radius)
+  for j, b in ipairs(body.tail) do
+    love.graphics.circle('fill', b.pos.x, b.pos.y, math.random(1, b.radius/4))
+  end
+  love.graphics.setColor({1, 1, 1})
+
  for i, enemy in ipairs(enemies) do
-    love.graphics.circle('line', enemy.pos.x, enemy.pos.y, enemy.radius)
+    love.graphics.circle('line', enemy.pos.x, enemy.pos.y, math.random(enemy.radius, enemy.radius*2))
     if enemy.hit then
       love.graphics.circle('line', enemy.pos.x, enemy.pos.y, math.random(100))
+    end
+    for j, e in ipairs(enemy.tail) do
+      love.graphics.circle('line', e.pos.x, e.pos.y, e.radius/4)
     end
  end
 end

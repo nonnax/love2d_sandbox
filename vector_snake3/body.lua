@@ -30,6 +30,19 @@ local function Body(x, y, r)
     return self.hit
   end
 
+  function self.grow(n)
+    for i=1, n or 1 do
+      local t={}
+      t.pos=self.pos
+      t.radius=self.radius
+      self.tail[#self.tail+1] = t
+    end
+  end
+
+  function self.shrink()
+    table.remove(self.tail, 1)
+  end
+
   return self
 end
 
