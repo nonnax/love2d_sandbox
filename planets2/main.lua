@@ -1,20 +1,29 @@
 #!/usr/bin/env luvit
 -- main.lua
-tabler = require 'tabler'
 
 local function windowInit()
     w, h = love.graphics.getDimensions()
+    Width, Height = w, h
+end
+
+local function clearTails()
+    for name, planet in pairs(planets) do
+        planet.tail={}
+        planet.dmin = 10^5
+        planet.dmax = 0
+    end
+
 end
 
 function love.load()
-	music = love.audio.newSource("suspense.wav", "stream")
-	music:setLooping(true)
-	music:setVolume(0.2)
-	music:play()
-
+	-- music = love.audio.newSource("suspense.wav", "stream")
+	-- music:setLooping(true)
+	-- music:setVolume(0.2)
+    love.window.setTitle('Solar synchronicity dance - Randy Evangelista')
     love.window.setMode(800, 600, {resizable=true, vsync=0, minwidth=400, minheight=300})
     -- w, h = love.graphics.getDimensions()
     windowInit()
+    w, h = 10, 10
     planets = {}
 
     -- Define planets in our solar system with realistic initial conditions
@@ -31,28 +40,46 @@ function love.load()
     -- G = 6.674 * (10^-3)  -- gravitational constant
     GConstant = 6.674 * (10^-2)  -- gravitational constant
     G = GConstant
-    -- factor = 8
-    factor = 1.61803399
-    G = G * factor -- adjustment for simulation, 7 minimum too keep planets in orbit
+    GR = 1.61803399
+    adjust = 0.62
+    factor = GR * adjust
+    G = G * factor -- adjustment for simulation to keep planets in orbit
 
     frames = 0
-    trace = false
+    trace = true
+    play = false
     scale = 0.198
-    font = love.graphics.newFont( 'Monaco-Bold.otf' )
+    font = love.graphics.newFont( 'Monaco.ttf',9)
     love.graphics.setFont(font)
-    print(tabler(planets))
+    love.graphics.setLineStyle( 'smooth' )
+    love.graphics.setLineWidth( 0.25 )
+
 end
 
 function love.update(dt)
     updatePlanets(dt)
-    if love.keyboard.isDown("space") then
-        trace = not trace
-    elseif love.keyboard.isDown("down") then
+    if love.keyboard.isDown("down") then
         scale = scale - 0.01
     elseif love.keyboard.isDown("up") then
         scale = scale + 0.01
     end
     if scale < 0 then scale = 0.00001 end
+end
+
+function love.keyreleased( key )
+    if key=='space' then
+        trace = not trace
+    elseif key=='kp8' then
+        factor = factor + 0.01
+        G = GConstant * factor -- adjustment for simulation to keep planets in orbit
+        clearTails()
+    elseif key=='kp2' then
+        factor = factor - 0.01
+        G = GConstant * factor -- adjustment for simulation to keep planets in orbit
+        clearTails()
+    elseif key=='escape' or key=='q' then
+        love.event.quit()
+    end
 end
 
 function love.mousereleased( x, y, button )
@@ -80,7 +107,7 @@ function createPlanet(distance, eccentricity, inclination, velocity, mass)
     local vx = -velocity * math.sin(angle)
     local vy = velocity * math.cos(angle)
 
-    return {x = x, y = y, vx = vx, vy = vy, mass = mass, tail={}, sun_distance=0, sun_force=0}
+    return {x = x, y = y, vx = vx, vy = vy, mass = mass, tail={}, sun_distance=0, sun_force=0, dmin=10^5, dmax=0}
 end
 
 function updatePlanets(dt)
@@ -104,16 +131,21 @@ function updatePlanets(dt)
                     planet.sun_distance=distance
                     planet.sun_force=force
                 end
+                planet[x_name.."_force"]=force
             end
         end
 
         planet.vx = planet.vx + ax * dt
         planet.vy = planet.vy + ay * dt
 
+
         planet.x = planet.x + planet.vx * dt
         planet.y = planet.y + planet.vy * dt
 
-        if frames % 15 == 0 then
+        if planet.sun_distance < planet.dmin then planet.dmin = planet.sun_distance end
+        if planet.sun_distance > planet.dmax then planet.dmax = planet.sun_distance end
+
+        if frames % 10 == 0 then
             table.insert(planet.tail, {x=planet.x, y=planet.y})
             if #planet.tail > 750 then
                 table.remove(planet.tail, 1)
@@ -126,7 +158,6 @@ end
 function drawPlanets()
    love.graphics.push()
    love.graphics.translate(w, h)
-   -- love.graphics.translate(love.mouse.getPosition())
     for x, planet in pairs(planets) do
         local size = planet.mass/1.2
         love.graphics.setColor({1, 1, 1})
@@ -159,16 +190,16 @@ function drawPlanets()
         end
 
         if trace then
-           -- local width = love.graphics.getLineWidth( )
            love.graphics.setLineWidth(0.1)
            love.graphics.line(0, 0, planet.x * scale, planet.y * scale)
            love.graphics.print(string.format("%s: %d", x, planet.sun_distance), planet.x * scale, planet.y * scale)
-           -- love.graphics.setLineWidth(width)
         end
 
     end
     love.graphics.pop()
-    love.graphics.print(string.format("% 10s\t% 9s % 12s % 9s", 'planet', 'dist', 'mass/earth', 'sun_force'), 0, 0)
+
+    love.graphics.print(string.format("% 10s\t% 9s % 18s\t% 16s % 9s", 'planet', 'dist', 'dmin/dmax', 'mass/earth', 'sun_force'), 0, 0)
+
     local row=10
     for x, planet in pairs(planets) do
         if x=='Sun'  then
@@ -183,12 +214,16 @@ function drawPlanets()
             love.graphics.setColor({1, 1, 1})
         end
 
-        -- love.graphics.print(x..':'..math.ceil(planet.sun_distance), 0, row)
-        love.graphics.print(string.format("% 10s:\t% 9.2f % 12.2f % 9.2f", x, planet.sun_distance, planet.mass, planet.sun_force), 0, row)
 
-        row = row + 15
+        love.graphics.print(string.format("% 10s: % 9.3f (%9.1f/%9.1f) % 16.3f % 9.3f", x, planet.sun_distance, planet.dmin, planet.dmax, planet.mass, planet.sun_force), 0, row)
+
+        row = row + 12
     end
-    love.graphics.print(string.format("G:%f x %f = G(simulation):%f", GConstant, factor, G), 0, row + 20)
+    love.graphics.setColor({1, 1, 1})
+    love.graphics.print(string.format("sim G^-2:%f x f:%f = %f", GConstant, factor, G), 0, Height - 40)
+    love.graphics.print(string.format("f: % .3f/%.3f",  GR, adjust/GR), 0, Height - 30)
+    love.graphics.print("mouse:center/resize | space:trace | keypad(8, 2):gravity+-(0.01) | esc:quit", 0, Height - 20)
+
 end
 
 function love.resize()
