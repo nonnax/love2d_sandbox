@@ -19,7 +19,6 @@ function loadPlanets()
 
     -- Define planets in our solar system with realistic initial conditions
     planets["Sun"] = createPlanet(0, 0, 0, 0, 1989000)  -- mass of the Sun in Earth masses
-
     planets["Mercury"] = createPlanet(57.9, 0, 0, 47.87, 0.055)  -- semi-major axis, eccentricity, inclination
     planets["Venus"] = createPlanet(108.2, 0, 0, 35.02, 0.815)
     planets["Earth"] = createPlanet(149.6, 0, 0, 29.78, 1)
@@ -28,6 +27,27 @@ function loadPlanets()
     planets["Saturn"] = createPlanet(1427.0, 0, 0, 9.68, 95.16)
     planets["Uranus"] = createPlanet(2871.0, 0, 0, 6.81, 14.54)
     planets["Neptune"] = createPlanet(4497.1, 0, 0, 5.43, 17.15)
+
+    planets["Sun"].color="yellow"
+    planets["Mercury"].color="purple"
+    planets["Venus"].color="orange"
+    planets["Earth"].color="yellowgreen"
+    planets["Mars"].color="red"
+    planets["Jupiter"].color="blue"
+    planets["Saturn"].color="brown"
+    planets["Uranus"].color="darkblue"
+    planets["Neptune"].color="darkmagenta"
+
+    planets["Sun"].size=4
+    planets["Mercury"].size=1
+    planets["Venus"].size=1.2
+    planets["Earth"].size=1.5
+    planets["Mars"].size=1.1
+    planets["Jupiter"].size=3.5
+    planets["Saturn"].size=3
+    planets["Uranus"].size=2
+    planets["Neptune"].size=2.2
+
 
     GConstant = 6.674 * (10^-2)  -- gravitational constant
     G = GConstant
@@ -91,36 +111,10 @@ function drawPlanets()
    -- sun follows mouse-click release
    love.graphics.translate(w, h)
     for x, planet in pairs(planets) do
-        local size = planet.mass/1.2
-        love.graphics.setColor({1, 1, 1})
-        if x=='Sun'  then
-            size = 4
-            love.graphics.setColor({0, 1, 0})
-        elseif x=='Mercury' then
-            love.graphics.setColor(colors.darkgrey)
-        elseif x=='Earth' then
-            size = 1.5
-            love.graphics.setColor(colors.yellowgreen)
-        elseif x=='Mars' then
-            size = 1.2
-            love.graphics.setColor(colors.darkred)
-        elseif x=='Jupiter' then
-            love.graphics.setColor(colors.violet)
-            size = 3.5
-        elseif x=='Saturn' then
-            love.graphics.setColor(colors.brown)
-            size = 3
-        elseif x=='Uranus' then
-            love.graphics.setColor(colors.darkgreen)
-            size = 2
-        elseif x=='Neptune'then
-            love.graphics.setColor(colors.darkmagenta)
-            size = 2.2
-        elseif size < 1 then
-            size = 1
-        end
 
-        size = size * scale
+        love.graphics.setColor(colors[planet.color])
+
+        size = planet.size * scale
 
         if x=='Sun' then
             love.graphics.circle("fill", planet.x * scale, planet.y * scale, math.random(size-2, size))
@@ -141,34 +135,13 @@ function drawPlanets()
 
     end
     love.graphics.pop()
-    love.graphics.setColor({1, 1, 1})
-    love.graphics.print(string.format("% 10s\t% 9s % 17s\t% 11s % 10s", 'planet', 'dist', 'dmin/dmax', 'mass', 'force/sun'), 0, 0)
+    love.graphics.setColor(colors.white)
+    love.graphics.print(string.format("% 10s\t% 9s % 17s\t% 11s % 10s", 'body', 'r', 'rmin/rmax', 'mass', 'force/sun'), 0, 0)
 
     local row=10
     for x, planet in pairs(planets) do
-        if x=='Sun'  then
-            love.graphics.setColor({0, 1, 0})
-        elseif x=='Jupiter'then
-            love.graphics.setColor(colors.violet)
-        elseif x=='Saturn' then
-            love.graphics.setColor(colors.brown)
-        elseif x=='Uranus' then
-            love.graphics.setColor(colors.darkgreen)
-        elseif x=='Neptune'then
-            love.graphics.setColor(colors.darkmagenta)
-        elseif x=='Earth' then
-            love.graphics.setColor(colors.yellowgreen)
-        elseif x=='Mercury' then
-            love.graphics.setColor(colors.darkgrey)
-        elseif x=='Mars' then
-            love.graphics.setColor(colors.darkred)
-        else
-            love.graphics.setColor({1, 1, 1})
-        end
-
-
+        love.graphics.setColor(colors[planet.color])
         love.graphics.print(string.format("% 10s: % 9.3f (%9.1f/%9.1f) % 12.3f % 9.3f", x, planet.sun_distance, planet.dmin, planet.dmax, planet.mass, planet.sun_force), 0, row)
-
         row = row + 12
     end
 
