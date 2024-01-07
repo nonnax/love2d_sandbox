@@ -28,26 +28,9 @@ function love.load()
     -- w, h = love.graphics.getDimensions()
     windowInit()
     w, h = 10, 10
-    planets = {}
 
     -- Define planets in our solar system with realistic initial conditions
-    planets["Sun"] = createPlanet(0, 0, 0, 0, 1989000)  -- mass of the Sun in Earth masses
-
-    planets["Mercury"] = createPlanet(57.9, 0, 0, 47.87, 0.055)  -- semi-major axis, eccentricity, inclination
-    planets["Venus"] = createPlanet(108.2, 0, 0, 35.02, 0.815)
-    planets["Earth"] = createPlanet(149.6, 0, 0, 29.78, 1)
-    planets["Mars"] = createPlanet(227.9, 0, 0, 24.077, 0.107)
-    planets["Jupiter"] = createPlanet(778.3, 0, 0, 13.07, 317.8)
-    planets["Saturn"] = createPlanet(1427.0, 0, 0, 9.68, 95.16)
-    planets["Uranus"] = createPlanet(2871.0, 0, 0, 6.81, 14.54)
-    planets["Neptune"] = createPlanet(4497.1, 0, 0, 5.43, 17.15)
-    -- G = 6.674 * (10^-3)  -- gravitational constant
-    GConstant = 6.674 * (10^-2)  -- gravitational constant
-    G = GConstant
-    GR = 1.61803399
-    adjust = 0.62
-    factor = GR * adjust
-    G = G * factor -- adjustment for simulation to keep planets in orbit
+    loadPlanets()
 
     frames = 0
     trace = true
@@ -103,6 +86,12 @@ function love.draw()
     love.graphics.setBackgroundColor({15/255, 15/255, 15/255})
     love.graphics.setColor({1,1,1})
     drawPlanets()
+
+    love.graphics.setColor({1, 1, 1})
+    love.graphics.print(string.format("sim G^-2:%f x f:%f = %f", GConstant, factor, G), 0, Height - 40)
+    love.graphics.print(string.format("f: % .3f/%.3f",  GR, adjust/GR), 0, Height - 30)
+    love.graphics.print("mouse:center/resize | space:radius toggle | keypad(8, 2):gravity(+-0.01) | esc:quit", 0, Height - 10)
+    love.graphics.print("note:uses symplectic Euler integration, not 100% accurate", 0, Height - 20)
 end
 function love.resize()
    windowInit()
