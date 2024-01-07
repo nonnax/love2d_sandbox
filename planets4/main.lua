@@ -84,10 +84,10 @@ end
 
 function love.draw()
     love.graphics.setBackgroundColor({15/255, 15/255, 15/255})
-    love.graphics.setColor({1,1,1})
+    love.graphics.setColor(colors.white)
     drawPlanets()
 
-    love.graphics.setColor({1, 1, 1})
+    love.graphics.setColor(colors.white)
     love.graphics.print(string.format("sim G^-2:%f x f:%f = %f", GConstant, factor, G), 0, Height - 40)
     love.graphics.print(string.format("f: % .3f/%.3f",  GR, adjust/GR), 0, Height - 30)
     love.graphics.print("mouse:center/zoom | space:radius(on|off) | keypad(8, 2):gravity(+-0.01) | esc:quit", 0, Height - 10)
