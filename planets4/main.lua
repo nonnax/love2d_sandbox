@@ -56,11 +56,11 @@ end
 function love.keyreleased( key )
     if key=='space' then
         trace = not trace
-    elseif key=='kp8' then
+    elseif key=='kp+' or key=='=' then
         factor = factor + 0.001
         G = GConstant * factor -- adjustment for simulation to keep planets in orbit
         clearTails()
-    elseif key=='kp2' then
+    elseif key=='kp-' or key=='-' then
         factor = factor - 0.001
         G = GConstant * factor -- adjustment for simulation to keep planets in orbit
         clearTails()
@@ -88,10 +88,10 @@ function love.draw()
     drawPlanets()
 
     love.graphics.setColor(colors.white)
-    love.graphics.print(string.format("sim G^-2:%f x f:%f = %f", GConstant, factor, G), 0, Height - 40)
-    love.graphics.print(string.format("f: % .3f/%.3f",  GR, adjust/GR), 0, Height - 30)
-    love.graphics.print("mouse:center/zoom | space:radius(on|off) | keypad(8, 2):gravity(+-0.01) | esc:quit", 0, Height - 10)
-    love.graphics.print("motion calc: symplectic Euler integration, not 100% accurate", 0, Height - 20)
+    love.graphics.print(string.format("SIM G^-2:%f x f:%f = %f", GConstant, factor, G), 10, Height - 50)
+    love.graphics.print(string.format("f:% .4f*%.4f=%f",  GR, adjust, GR*adjust), 10, Height - 40)
+    love.graphics.print(string.upper("mouse:center/zoom | space:R(on|off) | +/-:G(0.01) | esc:quit"), 10, Height - 20)
+    love.graphics.print(string.upper("integration: symplectic Euler"), 10, Height - 30)
 end
 function love.resize()
    windowInit()

@@ -1,4 +1,6 @@
 #!/usr/bin/env luvit
+-- Id$ nonnax Sun Jan  7 15:10:49 2024
+-- https://github.com/nonnax
 -- main.lua
 
 local function windowInit()

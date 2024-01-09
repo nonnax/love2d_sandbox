@@ -20,6 +20,7 @@ function love.load()
   frames = 0
   lineheight = 14
   blink = true
+  saved = true
   col = text:len()
 end
 
@@ -33,7 +34,7 @@ function love.textinput(t)
     text = text .. t
     col = text:len()
   end
-
+  saved = false
 end
 
 function love.keypressed(key)
@@ -43,6 +44,7 @@ function love.keypressed(key)
       row = row - 1
       if row < 1 then row = 1 end
       text = buffer[row]
+      col = text:len()
     elseif col < text:len() then
       text = text:remove(col)
       col = col - 1
@@ -56,7 +58,10 @@ function love.keypressed(key)
         -- string.sub operates on bytes rather than UTF-8 characters, so we couldn't do string.sub(text, 1, -2).
         text = string.sub(text, 1, byteoffset - 1)
       end
+      col = text:len()
     end
+    saved = false
+
   elseif key == "left" then
     col = col - 1
     if col < 1 then col = 0 end
@@ -68,22 +73,23 @@ function love.keypressed(key)
     if col == text:len() then row = row + 1 end
     text = buffer[row] or ""
     col = text:len()
+    saved = true
   end
 end
 
 function love.keyreleased(key)
-  if key == "up" then
+  if key == "up" and saved then
     row = row - 1
     if row < 1 then row = 1 end
     text = buffer[row]
     col = text:len()
-  elseif key == "down" then
+  elseif key == "down" and saved then
     row = row + 1
     if row > #buffer then row = #buffer end
     text = buffer[row]
     col = text:len()
   elseif key == "escape" then
-    love.filesystem.write('filename.txt', table.concat(buffer, "\n"))
+    love.filesystem.write(fname, table.concat(buffer, "\n"))
     love.event.quit()
   end
 end
@@ -107,9 +113,10 @@ end
 
 function love.draw()
   local cursorX = 7 * text:len() + 10
-
   love.graphics.circle('line', cursorX, 1, 3)
+  if not saved then love.graphics.setColor({1, 0, 0}) end
   love.graphics.printf(text, 10, row * lineheight, love.graphics.getWidth())
+  love.graphics.setColor({1, 1, 1})
   for i, t in pairs(buffer) do
     if i ~= row then
       love.graphics.printf(t, 10, i * lineheight, love.graphics.getWidth())
@@ -120,7 +127,7 @@ function love.draw()
     love.graphics.rectangle('fill', col * 7 + 10, row * lineheight, 5, 15)
   end
 
-  love.graphics.print(format("row:%d|col:%d", row, col), 10, Height - 20)
+  love.graphics.print(format("row:%d col:%d", row, col), 10, Height - 20)
 end
 
 function love.resize()

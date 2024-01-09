@@ -22,7 +22,9 @@ function createPlanet(distance, eccentricity, inclination, velocity, mass)
     sun_distance = 0,
     sun_force = 0,
     dmin = 10 ^ 5,
-    dmax = 0
+    dmax = 0,
+    size = 1,
+    color = "white"
   }
 end
 
@@ -45,10 +47,10 @@ function loadPlanets()
   planets["Venus"].color   = "grey"
   planets["Earth"].color   = "yellowgreen"
   planets["Mars"].color    = "red"
-  planets["Jupiter"].color = "blue"
+  planets["Jupiter"].color = "plum"
   planets["Saturn"].color  = "brown"
   planets["Uranus"].color  = "pink"
-  planets["Neptune"].color = "darkmagenta"
+  planets["Neptune"].color = "orangered"
 
   planets["Sun"].size     =  4
   planets["Mercury"].size =  1
@@ -144,23 +146,25 @@ function drawPlanets()
     if trace then
       love.graphics.setLineWidth(0.1)
       love.graphics.line(0, 0, planet.x * scale, planet.y * scale)
-      love.graphics.print(string.format("%s: %d", x, planet.sun_distance),
+      love.graphics.print(string.upper(string.format("%s: %d", x, planet.sun_distance)),
                           planet.x * scale, planet.y * scale)
     end
 
   end
   love.graphics.pop()
   love.graphics.setColor(colors.white)
-  love.graphics.print(string.format("% 10s\t% 9s % 17s\t% 11s % 10s", 'body',
-                                    'r', 'rmin/rmax', 'mass', 'force/sun'), 0, 0)
+  local header = string.format("% 10s\t% 9s % 17s\t% 11s % 10s", 'body',
+                                      'r', 'rmin/rmax', 'mass', 'force/sun')
+  love.graphics.print(string.upper(header), 0, 5)
 
-  local row = 10
+  local row = 15
   for x, planet in pairs(planets) do
-    love.graphics.setColor(colors[planet.color])
-    love.graphics.print(string.format(
-                          "% 10s: % 9.3f (%9.1f/%9.1f) % 12.3f % 9.3f", x,
-                          planet.sun_distance, planet.dmin, planet.dmax,
-                          planet.mass, planet.sun_force), 0, row)
+    -- love.graphics.setColor(colors[planet.color])
+    local info = string.format(
+                              "% 10s: % 9.3f (%9.1f/%9.1f) % 12.3f % 9.3f", x,
+                              planet.sun_distance, planet.dmin, planet.dmax,
+                              planet.mass, planet.sun_force)
+    love.graphics.print(string.upper(info), 0, row)
     row = row + 12
   end
 
