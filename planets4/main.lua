@@ -20,9 +20,6 @@ local function clearTails()
 end
 
 function love.load()
-	-- music = love.audio.newSource("suspense.wav", "stream")
-	-- music:setLooping(true)
-	-- music:setVolume(0.2)
     love.window.setTitle('Solar synchronicity dance - Randy Evangelista')
     love.window.setMode(800, 600, {resizable=true, vsync=0, minwidth=400, minheight=300})
     -- w, h = love.graphics.getDimensions()

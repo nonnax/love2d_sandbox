@@ -5,7 +5,6 @@
 colors = require 'love_colors'
 
 function createPlanet(distance, eccentricity, inclination, velocity, mass)
-  -- local angle = love.math.random() * 2 * math.pi
   local angle = love.math.random(math.pi * 4)
   local x = distance * math.cos(angle)
   local y = distance * math.sin(angle)
@@ -31,9 +30,10 @@ end
 function loadPlanets()
   planets = {}
 
-  -- Define planets in our solar system with realistic initial conditions
+  -- Define planets initial conditions
+  -- TO BE IMPLEMENTED: semi-major axis, eccentricity, inclination
   planets["Sun"]     = createPlanet(0, 0, 0, 0, 1989000) -- mass of the Sun in Earth masses
-  planets["Mercury"] = createPlanet(57.9, 0, 0, 47.87, 0.055) -- semi-major axis, eccentricity, inclination
+  planets["Mercury"] = createPlanet(57.9, 0, 0, 47.87, 0.055)
   planets["Venus"]   = createPlanet(108.2, 0, 0, 35.02, 0.815)
   planets["Earth"]   = createPlanet(149.6, 0, 0, 29.78, 1)
   planets["Mars"]    = createPlanet(227.9, 0, 0, 24.077, 0.107)
@@ -62,13 +62,12 @@ function loadPlanets()
   planets["Uranus"].size  =  2
   planets["Neptune"].size =  2.2
 
-  GConstant = 6.674 * (10 ^ -2) -- gravitational constant
+  GConstant = 6.674 * (10 ^ -2) -- sim gravitational constant
   G = GConstant
   GR = 1.61803399
   adjust = 0.62
   factor = GR * adjust
-  G = G * factor -- adjustment for simulation to keep planets in orbit
-
+  G = G * factor -- ADJUSTMENT: to attract planets in orbit range
 end
 
 function updatePlanets(dt)
@@ -96,7 +95,8 @@ function updatePlanets(dt)
       end
     end
 
-    -- semi-implicit euler (symplectic euler)
+    -- GOOD FOR NOW: semi-implicit euler (symplectic euler), not accurate
+    -- candidate integrators: verlet, runge-kutta 4 (RK4)?
 
     planet.vx = planet.vx + ax * dt
     planet.vy = planet.vy + ay * dt
@@ -123,8 +123,10 @@ end
 
 function drawPlanets()
   love.graphics.push()
+
   -- sun follows mouse-click release
   love.graphics.translate(w, h)
+
   for x, planet in pairs(planets) do
 
     love.graphics.setColor(colors[planet.color])
@@ -154,7 +156,7 @@ function drawPlanets()
   love.graphics.pop()
   love.graphics.setColor(colors.white)
   local header = string.format("% 10s\t% 9s % 17s\t% 11s % 10s", 'body',
-                                      'r', 'rmin/rmax', 'mass', 'force/sun')
+                                      'r', 'r(extent)', 'mass', 'force/sun')
   love.graphics.print(string.upper(header), 0, 5)
 
   local row = 15
