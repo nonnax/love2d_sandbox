@@ -3,7 +3,7 @@
 -- https://github.com/nonnax
 
 function createPlanet(distance, eccentricity, inclination, velocity, mass)
-    local angle = -love.math.random() * 2 * math.pi
+    local angle = love.math.random() * 2 * math.pi
 
     -- Ensure counter-clockwise rotation in the inverted y-axis system
     if angle < math.pi then
@@ -14,8 +14,8 @@ function createPlanet(distance, eccentricity, inclination, velocity, mass)
 
     local x = distance * math.cos(angle)
     local y = distance * math.sin(angle)
-    local vx = -velocity * math.sin(angle)
-    local vy = velocity * math.cos(angle)
+    local vx = velocity * math.sin(angle)
+    local vy = -velocity * math.cos(angle)
 
     return { x = x, y = y, vx = vx, vy = vy, mass = mass, rmin=10^5, rmax=0, trajectory={} }
 end

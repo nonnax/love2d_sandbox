@@ -5,11 +5,12 @@
 colors = require 'love_colors'
 
 function createPlanet(distance, eccentricity, inclination, velocity, mass)
-  local angle = love.math.random(math.pi * 4)
+  -- local angle = love.math.random(-math.pi * 4)
+  local angle = love.math.random() * 2 * math.pi
   local x = distance * math.cos(angle)
   local y = distance * math.sin(angle)
-  local vx = -velocity * math.sin(angle)
-  local vy = velocity * math.cos(angle)
+  local vx = velocity * math.sin(angle)
+  local vy = -velocity * math.cos(angle)
 
   return {
     x = x,

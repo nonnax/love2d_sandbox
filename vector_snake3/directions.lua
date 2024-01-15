@@ -42,13 +42,21 @@ function directions()
      if cb then cb(key) end
      return self.heading
  end
- function self.move()
+
+ -- next step along current heading
+ -- return a direction vector
+ function self.move(dx)
+   if dx and self[dx] then self.heading = dx end
    local d = self[self.heading]
    return vector(d.x, d.y)
  end
+ -- alias
+ self.update = self.move
+
  function self.bounce()
    self.heading=self.inverter[self.heading]
  end
+
  return self
 end
 
